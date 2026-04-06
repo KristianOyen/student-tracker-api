@@ -6,6 +6,49 @@
     <title>Study tracker</title>
 </head>
 <body>
-    
+    <h1>Study Tracker</h1>
+    <p>Track your study sessions by subject</p>
+    <hr>
+
+    <h2>Add Sessions</h2>
+    <input type="text" id="subject" placeholder="Subject">
+    <input type="number" id="duration" placeholder="minutes">
+   
+    <button onclick="addSessions()"> ADD</button>
+
+    <h2>Sessions</h2>
+    <ul id="sessions-list"></ul>
+
+
+    <script>
+        async function getSessions() {
+            const res = await fetch("http://localhost:8000/sessions");
+            const data = await res.json();
+            const list = document.getElementById("sessions-list")
+            list.innerHTML = "";
+            data.forEach(session => {
+                list.innerHTML += `<li>${session[1]} - ${session[2]} min 
+                <button onclick="deleteSession(${session[0]})">Delete</button></li>`;
+            });
+        }
+
+        async function addSessions() {
+            const subject = document.getElementById("subject").value;
+            const duration = document.getElementById("duration").value;
+            await fetch("http://localhost:8000/sessions", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({subject, duration: parseInt(duration)})
+            });
+            getSessions();
+        }
+
+        async function deleteSessions(id) {
+            await fetch("http://localhost:8000/sessions/${id}", {method: "DELETE"});
+            getSessions();
+        }
+        
+        getSessions();
+    </script>
 </body>
 </html>
