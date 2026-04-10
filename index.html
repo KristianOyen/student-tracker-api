@@ -35,16 +35,17 @@
         async function addSessions() {
             const subject = document.getElementById("subject").value;
             const duration = document.getElementById("duration").value;
+            console.log("Subject:", subject, "Duration:", duration);
             await fetch("http://localhost:8000/sessions", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({subject, duration: parseInt(duration)})
+                body: JSON.stringify({subject: subject, duration_minutes: parseInt(duration)})
             });
             getSessions();
         }
 
-        async function deleteSessions(id) {
-            await fetch("http://localhost:8000/sessions/${id}", {method: "DELETE"});
+        async function deleteSession(id) {
+            await fetch(`http://localhost:8000/sessions/${id}`, {method: "DELETE"});
             getSessions();
         }
         

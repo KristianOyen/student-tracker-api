@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 
 
@@ -8,7 +9,6 @@ def get_db():
 
 
 app = FastAPI()
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -50,23 +50,27 @@ def get_sessions():
 
 
 @app.post("/sessions")
-def create_sessions(subject: str, duration: int):
+async def create_sessions(request: Request):
+    data = await request.json()
+    subject = data["subject"]
+    duration_minutes = data["duration_minutes"]
+
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO sessions (subject, duration_minutes) VALUES (?, ?)",
-        (subject, duration),
+        (subject, duration_minutes),
     )
     conn.commit()
     conn.close()
     return {"created": True}
 
 
-@app.delete("/sessions{id}")
+@app.delete("/sessions/{id}")
 def delete_sessions(id: int):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM sessions WHERE id = ?", (id))
+    cursor.execute("DELETE FROM sessions WHERE id = ?", (id,))
     conn.commit()
     conn.close()
     return {"deleted": True}
