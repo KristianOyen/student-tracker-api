@@ -1,0 +1,21 @@
+body {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color:aliceblue
+}
+
+button {
+    padding: 8px 16px;
+    cursor: pointer; 
+    border-radius: 6px;
+    background-color: #081998;
+    color: white;
+}
+
+input{
+    padding: 8px; 
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
