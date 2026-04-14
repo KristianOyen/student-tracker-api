@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study tracker</title>
+    <link rel="stylesheet" href="style.css"
 </head>
 <body>
     <h1>Study Tracker</h1>
@@ -24,20 +25,31 @@
         async function getSessions() {
             const res = await fetch("http://localhost:8000/sessions");
             const data = await res.json();
+
             const list = document.getElementById("sessions-list")
             list.innerHTML = "";
+
             data.forEach(session => {
-                list.innerHTML += `<li>${session[1]} - ${session[2]} min 
-                <button onclick="deleteSession(${session[0]})">Delete</button></li>`;
+                list.innerHTML += `
+                <li>
+                    <strong>${session.created_at}</strong>:
+                    ${session.subject} - ${session.duration_minutes} min 
+
+                <button onclick="deleteSession(${session.id})">Delete</button>
+                </li>`;
             });
         }
+
 
         async function addSessions() {
             const subject = document.getElementById("subject").value;
             const duration = document.getElementById("duration").value;
+
             console.log("Subject:", subject, "Duration:", duration);
+
             await fetch("http://localhost:8000/sessions", {
                 method: "POST",
+
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({subject: subject, duration_minutes: parseInt(duration)})
             });
