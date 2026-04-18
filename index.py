@@ -2,13 +2,18 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 from datetime import datetime
+from contextlib import asynccontextmanager
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 def get_db():
-    conn = sqlite3.connect("StudyTracker.db")
-    return conn
-
-
-app = FastAPI()
+    return sqlite3.connect("StudyTracker.db")
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,27 +22,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 def init_db():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS sessions(
-            id INTEGER PRIMARY KEY, 
-            subject TEXT,
-            duration_minutes INTEGER,
-            created_at TEXT
-        )
-    """
-    )
-    conn.commit()
-    conn.close()
-
-
-@app.on_event("startup")
-def startup():
-    init_db()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sessions(
+                id INTEGER PRIMARY KEY, 
+                subject TEXT,
+                duration_minutes INTEGER,
+                created_at TEXT
+            )
+        """)
+        conn.commit()
 
 
 @app.get("/sessions")
@@ -70,11 +66,17 @@ async def create_sessions(request: Request):
     return {"created": True}
 
 
-@app.delete("/sessions/{id}")
-def delete_sessions(id: int):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM sessions WHERE id = ?", (id,))
-    conn.commit()
-    conn.close()
+@app.delete("/sessions/{session_id}")
+def delete_sessions(session_id: int):
+    with get_db() as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        query = "DELETE FROM sessions WHERE id = ?"
+        cursor.execute(query, (session_id,))
+
+        conn.commit()
+    
     return {"deleted": True}
+
+
