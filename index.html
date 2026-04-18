@@ -31,11 +31,13 @@
 
             data.forEach(session => {
                 list.innerHTML += `
-                <li>
+                <li class="session-item">
+                    <span class="session-text">
                     <strong>${session.created_at}</strong>:
                     ${session.subject} - ${session.duration_minutes} min 
+                    </span>
 
-                <button onclick="deleteSession(${session.id})">Delete</button>
+                <button class="delete" onclick="deleteSession(${session.id})">Delete</button>
                 </li>`;
             });
         }
@@ -56,8 +58,8 @@
             getSessions();
         }
 
-        async function deleteSession(id) {
-            await fetch(`http://localhost:8000/sessions/${id}`, {method: "DELETE"});
+        async function deleteSession(session_id) {
+            await fetch(`http://localhost:8000/sessions/${session_id}`, {method: "DELETE"});
             getSessions();
         }
         
